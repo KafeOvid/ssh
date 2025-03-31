@@ -1,17 +1,15 @@
-# Use an official Ubuntu as a parent image
-FROM ubuntu:latest
+# Use a base image that supports systemd, for example, Ubuntu
+FROM ubuntu:20.04
 
-# Install OpenSSH server
-RUN apt update && apt install -y openssh-server
+# Install necessary packages
+RUN apt-get update && \
+apt-get install -y shellinabox && \
+apt-get install -y systemd && \
+apt-get clean && \
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN echo 'root:root' | chpasswd
+# Expose the web-based terminal port
+EXPOSE 4200
 
-# Create the directory for the sshd process
-RUN mkdir /var/run/sshd
-
-# Set the root password for SSH (change this password)
-RUN echo 'root:yourpassword' | chpasswd
-
-# Expose the SSH port
-EXPOSE 22
-
-# Start the SSH daemon
-CMD ["/usr/sbin/sshd", "-D"]
+# Start shellinabox
+CMD ["/usr/bin/shellinaboxd", "-t", "-s", "/:LOGIN"]
